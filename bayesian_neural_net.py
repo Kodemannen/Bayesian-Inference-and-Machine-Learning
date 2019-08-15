@@ -196,6 +196,8 @@ def build_fake_data(num_examples=10):
     mnist_data.train = Dummy()
     mnist_data.train.images = np.float32(np.random.randn(
         num_examples, *IMAGE_SHAPE))
+    #print(mnist_data.train.images.shape)
+    #exit("ballemos")
     mnist_data.train.labels = np.int32(np.random.permutation(
         np.arange(num_examples)))
     mnist_data.train.num_examples = num_examples
@@ -208,8 +210,77 @@ def build_fake_data(num_examples=10):
     return mnist_data
 
 
-def Use_ising_data():
+def Get_ising_data():
+    import pickle
+    np.random.seed(100)
     
+    def read_t(t,root="/home/samknu/MyRepos/MLProjectIsingModel/data/IsingData/"):
+        data = pickle.load(open(root+'Ising2DFM_reSample_L40_T=%.2f.pkl'%t,'rb'))
+        return np.unpackbits(data).astype(int).reshape(-1,1600)
+    
+    temperatures = np.arange(0.25, 4., step=0.25)
+    
+    ordered = np.zeros(shape=(np.sum(temperatures<2.0),10000,1600))
+    disordered = np.zeros(shape=(np.sum(temperatures>2.5),10000,1600))
+    critical = np.zeros(shape=(np.sum((temperatures>=2.0)*(temperatures<=2.5)),10000,1600))
+    
+    ordered_index = 0
+    disordered_index = 0
+    crit_index = 0
+    for i in range(len(temperatures)):
+        T = temperatures[i]
+        if T < 2.0:
+            ordered[ordered_index] = read_t(T)
+            ordered_index += 1
+        elif T > 2.5:
+            disordered[disordered_index] = read_t(T)
+            disordered_index += 1
+        else:
+            critical[crit_index] = read_t(T)
+            crit_index += 1
+
+    ordered = ordered.reshape(-1,1600)       # 70000
+    disordered = disordered.reshape(-1,1600) # 50000
+    critical = critical.reshape(-1,1600)     # 30000
+
+    np.random.shuffle(ordered)
+    np.random.shuffle(disordered)
+    np.random.shuffle(critical)
+
+    training_data = np.zeros((6000*12,1600))
+    evaluation_data = np.zeros((2000*12,1600))
+    test_data = np.zeros((2000*12 + 10000*3,1600))
+
+    training_data[:round(0.6*70000)] = ordered[:round(0.6*70000)]
+    training_data[round(0.6*70000):] = disordered[:round(0.6*50000)]
+
+    evaluation_data[:round(0.2*70000)] = ordered[round(0.6*70000):round(0.6*70000)+round(0.2*70000)]
+    evaluation_data[round(0.2*70000):] = disordered[round(0.6*50000):round(0.6*50000)+round(0.2*50000)]
+
+    test_data[:round(0.2*70000)] = ordered[round(0.6*70000)+round(0.2*70000):round(0.6*70000)+2*round(0.2*70000)]
+    test_data[round(0.2*70000):round(0.2*70000)+round(0.2*50000)] = disordered[round(0.6*50000)+round(0.2*50000):round(0.6*50000)+2*round(0.2*50000)]
+    test_data[round(0.2*70000)+round(0.2*50000):] = critical
+
+    train_labels = np.zeros(6000*12)
+    train_labels[round(0.6*70000):] = np.ones(round(0.6*50000))
+
+    evaluation_labels = np.zeros(2000*12)
+    evaluation_labels[round(0.2*70000):] = np.ones(round(0.2*50000))
+
+    # Class 0 is ordered, class 1 is disordered
+    
+    class Dummy(object):
+        pass
+    data = Dummy()
+    data.train=Dummy()
+
+    #data.train.images=np.float32()
+    
+    print(training_data.shape)
+    exit("asdvel")
+
+    return data
+
 
 
 def main(argv):
@@ -223,12 +294,14 @@ def main(argv):
 
 
   
-    if FLAGS.fake_data:
-        mnist_data = build_fake_data()
-    else:
-        mnist_data = mnist.read_data_sets(FLAGS.data_dir, reshape=False)
+    #if FLAGS.fake_data:
+    #    mnist_data = build_fake_data()
+    #else:
+    #mnist_data = mnist.read_data_sets(FLAGS.data_dir, reshape=False)
+    #mnist_data = build_fake_data()
+    data = Get_ising_data()
 
-    print(mnist_data.train.images.shape)
+    #print(mnist_data.train.images.shape)
     #print(mnist_data.shape)
     #ting = mnist.read_data_sets(FLAGS.data_dir, reshape=False)
     #print(type(ting))
@@ -236,7 +309,9 @@ def main(argv):
     (images, labels, handle,
     training_iterator, heldout_iterator) = build_input_pipeline(
         mnist_data, FLAGS.batch_size, mnist_data.validation.num_examples)
-
+    print(labels)
+    
+    exit("ehaosd")
     # Build a Bayesian LeNet5 network. We use the Flipout Monte Carlo estimator
     # for the convolution and fully-connected layers: this enables lower
     # variance stochastic gradients than naive reparameterization.
