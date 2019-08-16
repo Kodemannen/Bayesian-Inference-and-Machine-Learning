@@ -358,7 +358,7 @@ def Get_ising_data():
     
     cut_train = 20000   
     cut_val = 5000
-    cut_test = 100
+    cut_test = 1000
     training_data = training_data[:cut_train]
     training_labels = training_labels[:cut_train]
 
@@ -513,7 +513,7 @@ def main(argv):
                 
                 
                 probs_test = np.asarray([sess.run((labels_distribution.probs),
-                                            feed_dict={handle: heldout_handle})
+                                            feed_dict={handle: test_handle})
                                     for _ in range(FLAGS.num_monte_carlo)])
                 mean_probs_test = np.mean(probs_test, axis=0)
                 image_vals_test = sess.run((images),
