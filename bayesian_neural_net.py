@@ -510,6 +510,12 @@ def main(argv):
 
                 image_vals, label_vals = sess.run((images, labels),
                                                 feed_dict={handle: heldout_handle})
+                
+                
+                probs_test = np.asarray([sess.run((labels_distribution.probs),
+                                            feed_dict={handle: heldout_handle})
+                                    for _ in range(FLAGS.num_monte_carlo)])
+                mean_probs_test = np.mean(probs_test, axis=0)
                 image_vals_test = sess.run((images),
                                                 feed_dict={handle: test_handle})
 
@@ -533,7 +539,7 @@ def main(argv):
                                             title="mean heldout logprob {:.2f}"
                                             .format(heldout_lp))
 
-                    plot_test_prediction(image_vals_test, probs,
+                    plot_test_prediction(image_vals_test, probs_test,
                                             fname=os.path.join(
                                                 FLAGS.model_dir,
                                                 "step{:05d}_test_pred.png".format(step)))
