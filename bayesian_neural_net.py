@@ -62,7 +62,7 @@ flags.DEFINE_float("learning_rate",
                    default=0.001,
                    help="Initial learning rate.")
 flags.DEFINE_integer("max_steps",
-                     default=2000,
+                     default=6000,
                      help="Number of training steps to run.")
 flags.DEFINE_integer("batch_size",
                      default=128,
@@ -159,6 +159,44 @@ def plot_heldout_prediction(input_vals, label_vals, probs,
     print("saved {}".format(fname))
 
 
+
+def plot_test_prediction(input_vals, probs,
+                            fname, n=10, title=""):
+    """Save a PNG plot visualizing posterior uncertainty on heldout data.
+    Args:
+    input_vals: A `float`-like Numpy `array` of shape
+        `[num_heldout] + IMAGE_SHAPE`, containing heldout input images.
+    probs: A `float`-like Numpy array of shape `[num_monte_carlo,
+        num_heldout, num_classes]` containing Monte Carlo samples of
+        class probabilities for each heldout sample.
+    fname: Python `str` filename to save the plot to.
+    n: Python `int` number of datapoints to vizualize.
+    title: Python `str` title for the plot.
+    """
+    fig = figure.Figure(figsize=(9, 3*n))
+    canvas = backend_agg.FigureCanvasAgg(fig)
+    indices = np.random.randint(low=0,high=input_vals.shape[0],size=n)
+    for i in range(n):
+        ax = fig.add_subplot(n, 3, 3*i + 1)
+        ax.imshow(input_vals[indices[i], :].reshape(IMAGE_SHAPE[:-1]), interpolation="None")
+
+        ax = fig.add_subplot(n, 3, 3*i + 2)
+        for prob_sample in probs:
+            sns.barplot(np.arange(2) if ISING else np.arange(10), prob_sample[indices[i], :], alpha=0.5 if ISING else 0.1, ax=ax)
+            ax.set_ylim([0, 1])
+        ax.set_title("posterior samples")
+
+        ax = fig.add_subplot(n, 3, 3*i + 3)
+        sns.barplot(np.arange(2) if ISING else np.arange(10), np.mean(probs[:, indices[i], :], axis=0), ax=ax)
+        ax.set_ylim([0, 1])
+        ax.set_title("predictive probs, test set")
+        
+    fig.suptitle(title)
+    fig.tight_layout()
+
+    canvas.print_figure(fname, format="png")
+    print("saved {}".format(fname))
+
 def build_input_pipeline(mnist_data, batch_size, heldout_size):
     """Build an Iterator switching between train and heldout data."""
 
@@ -180,6 +218,15 @@ def build_input_pipeline(mnist_data, batch_size, heldout_size):
                     repeat().batch(heldout_size))
     heldout_iterator = tf.compat.v1.data.make_one_shot_iterator(heldout_frozen)
 
+
+    test_dataset = tf.data.Dataset.from_tensor_slices(
+        (mnist_data.test.images,
+        np.int32(mnist_data.test.labels)))
+    test_frozen = (test_dataset.take(heldout_size).
+                    repeat().batch(heldout_size))
+    test_iterator = tf.compat.v1.data.make_one_shot_iterator(test_frozen)
+
+
     # Combine these into a feedable iterator that can switch between training
     # and validation inputs.
     handle = tf.compat.v1.placeholder(tf.string, shape=[])
@@ -187,7 +234,7 @@ def build_input_pipeline(mnist_data, batch_size, heldout_size):
         handle, training_batches.output_types, training_batches.output_shapes)
     images, labels = feedable_iterator.get_next()
 
-    return images, labels, handle, training_iterator, heldout_iterator
+    return images, labels, handle, training_iterator, heldout_iterator, test_iterator
 
 
 def test_data_pipeline(mnist_data, batch_size):
@@ -197,20 +244,19 @@ def test_data_pipeline(mnist_data, batch_size):
     # Build a iterator over the heldout set with batch_size=heldout_size,
     # i.e., return the entire heldout set as a constant.
     heldout_dataset = tf.data.Dataset.from_tensor_slices(
-        (mnist_data.test.images,
-        np.int32(mnist_data.test.labels)))
-    heldout_frozen = (heldout_dataset.take(heldout_size).
-                    repeat().batch(heldout_size))
-    heldout_iterator = tf.compat.v1.data.make_one_shot_iterator(heldout_frozen)
+        (mnist_data.test.images))
+    heldout_frozen = (heldout_dataset.take(batch_size).
+                    repeat().batch(batch_size))
+    test_iterator = tf.compat.v1.data.make_one_shot_iterator(heldout_frozen)
 
     # Combine these into a feedable iterator that can switch between training
     # and test inputs.
     handle = tf.compat.v1.placeholder(tf.string, shape=[])
     feedable_iterator = tf.compat.v1.data.Iterator.from_string_handle(
         handle, heldout_dataset.output_types, heldout_dataset.output_shapes)
-    images, labels = feedable_iterator.get_next()
+    images = feedable_iterator.get_next()
 
-    return images, labels, handle, heldout_iterator
+    return images, handle, test_iterator
 
 
 
@@ -337,7 +383,7 @@ def Get_ising_data():
 
     ising_data.test=Dummy()
     ising_data.test.images = test_data
-    ising_data.test.labels = None
+    ising_data.test.labels = np.zeros(test_data.shape[0])   # dummy labels
     ising_data.test.num_examples = test_data.shape[0]
 
     return ising_data
@@ -364,7 +410,7 @@ def main(argv):
         the_data = mnist.read_data_sets(FLAGS.data_dir, reshape=False)
 
     
-    (images, labels, handle, training_iterator, heldout_iterator) = build_input_pipeline(
+    (images, labels, handle, training_iterator, heldout_iterator, test_iterator) = build_input_pipeline(
            the_data, FLAGS.batch_size, the_data.validation.num_examples)  
 
 
@@ -440,7 +486,10 @@ def main(argv):
         # Run the training loop.
         train_handle = sess.run(training_iterator.string_handle())
         heldout_handle = sess.run(heldout_iterator.string_handle())
+        test_handle = sess.run(test_iterator.string_handle())
+        
         for step in range(FLAGS.max_steps):
+            #for step in range(0):
             _ = sess.run([train_op, accuracy_update_op],
                         feed_dict={handle: train_handle})
             if step % 100 == 0:
@@ -461,9 +510,12 @@ def main(argv):
 
                 image_vals, label_vals = sess.run((images, labels),
                                                 feed_dict={handle: heldout_handle})
+                image_vals_test = sess.run((images),
+                                                feed_dict={handle: test_handle})
 
                 heldout_lp = np.mean(np.log(mean_probs[np.arange(mean_probs.shape[0]),
                                                     label_vals.flatten()]))
+                                                    
                 print(" ... Held-out nats: {:.3f}".format(heldout_lp))
 
                 qm_vals, qs_vals = sess.run((qmeans, qstds))
@@ -480,16 +532,11 @@ def main(argv):
                                                 "step{:05d}_pred.png".format(step)),
                                             title="mean heldout logprob {:.2f}"
                                             .format(heldout_lp))
-        # On test set:
-        # print("ermeh")
-        # images, labels, handle, test_iterator = test_data_pipeline(the_data, batch_size=100)
 
-        # print(images.shape)
-        #probs = np.asarray([sess.run((labels_distribution.probs),
-        #                    feed_dict={handle: test_handle})
-        #            for _ in range(FLAGS.num_monte_carlo)])
-        #mean_probs = np.mean(probs, axis=0)
-
+                    plot_test_prediction(image_vals_test, probs,
+                                            fname=os.path.join(
+                                                FLAGS.model_dir,
+                                                "step{:05d}_test_pred.png".format(step)))
 
 
 if __name__ == "__main__":
