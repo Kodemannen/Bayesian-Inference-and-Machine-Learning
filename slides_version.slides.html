@@ -13242,15 +13242,25 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Overview">Overview<a class="anchor-link" href="#Overview">&#182;</a></h3><p>This project is about the Bayesian approach to machine learning. More specifically we go through the Bayesian formulation of regression and neural networks for classification. We apply these methods to data from simulations of the 1 and 2 dimensional Ising models in similar style as Mehta et al. [4].</p>
-<p>This text is split up into 4 parts.</p>
-<ul>
-<li>Part 1 - General intro to Bayesian statistics</li>
-<li>Part 2 - Bayesian regression</li>
-<li>Part 3 - Bayesian Convolutional Neural Network</li>
-<li>Part 4 - Using Bayesian reasoning on the probability of life</li>
+<h1 id="Overview">Overview<a class="anchor-link" href="#Overview">&#182;</a></h1><ul>
+<li>About the Bayesian approach to statistics and machine learning (ML)</li>
+<li>This project is split up into 4 parts.</li>
 </ul>
-<p>The Python code for part 2 is written from scratch in raw NumPy, while the code for part 3 uses the TensorFlow Probability library.</p>
+<ol>
+<li>General intro to Bayesian statistics</li>
+<li>Bayesian regression<ul>
+<li>Coded in NumPy</li>
+</ul>
+</li>
+<li>Bayesian Convolutional Neural Network<ul>
+<li>Coded in Tensorflow Probability</li>
+</ul>
+</li>
+<li>Bayesian reasoning on the probability of life<ul>
+<li>How we can do inference on one-off events</li>
+</ul>
+</li>
+</ol>
 
 </div>
 </div>
@@ -13258,8 +13268,79 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Part-1---Bayesian-Statistics">Part 1 - Bayesian Statistics<a class="anchor-link" href="#Part-1---Bayesian-Statistics">&#182;</a></h1><p>Bayesian statistics is an alternative approach to the more common classical (frequentist) school of thought in statistics. It differs in the way that it views probability as our subjective uncertainty about the world, instead of as there being something inherently random in nature.</p>
-<p>The most notable difference in Bayesian statistics is the use of a <strong>prior</strong>, which is a way of incorporating the prior knowledge one often has about the problem into the inference. In Bayesian machine learning, using various priors are in many cases mathematically equivalent to specific regularization schemes that one often sees in classical machine learning.</p>
+<h3 id="Resources">Resources<a class="anchor-link" href="#Resources">&#182;</a></h3><ul>
+<li><p>Books</p>
+<ul>
+<li><em>Data Analysis - A Bayesian Tutorial</em> by Devinderjit Sivia</li>
+<li><em>Machine Learning: A Probabilistic Perspective</em> by Kevin P. Murphy</li>
+</ul>
+</li>
+<li><p>Articles</p>
+<ul>
+<li>Shridhar et al. <em>Uncertainty Estimations by Softplus normalization in Bayesian Convolutional Neural Networks with Variational Inference</em> <a href="https://arxiv.org/pdf/1806.05978.pdf">https://arxiv.org/pdf/1806.05978.pdf</a></li>
+<li>Wen et al. <em>Flipout: Efficient pseudo independent weight perturbations on mini-batches</em> <a href="https://arxiv.org/pdf/1803.04386.pdf">https://arxiv.org/pdf/1803.04386.pdf</a></li>
+<li>LeCun et al. <em>Gradient-Based Learning Applied to Document Recognition</em> <a href="http://yann.lecun.com/exdb/publis/pdf/lecun-01a.pdf">http://yann.lecun.com/exdb/publis/pdf/lecun-01a.pdf</a></li>
+<li>Mehta et al. <em>A high-bias, low-variance introduction to Machine Learning for physisits</em> <a href="https://arxiv.org/pdf/1803.08823.pdf">https://arxiv.org/pdf/1803.08823.pdf</a>, <a href="https://physics.bu.edu/~pankajm/MLnotebooks.html">https://physics.bu.edu/~pankajm/MLnotebooks.html</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Part-1---Bayesian-Statistics">Part 1 - Bayesian Statistics<a class="anchor-link" href="#Part-1---Bayesian-Statistics">&#182;</a></h1><ul>
+<li>Alternative approach to statistics</li>
+<li>Other school of though is called classical/frequentist statistics</li>
+<li>Difference:<ul>
+<li>Bayesian: Views probability as our subjective uncertainty about the world</li>
+<li>Frequentist: nature is random, probability is that randomness</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<ul>
+<li>The Prior<ul>
+<li>The most notable feature of Bayesian statistics</li>
+<li>Incorporates prior information about the problem</li>
+<li>In Bayesian ML - often equivalent to regularization schemes in classical ML</li>
+<li>Will get back to exactly what the prior is</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<ul>
+<li>Benefits of the Bayesian approach for hypothesis estimation<ul>
+<li>Hypothesis estimate is a distribution (pdf)<ul>
+<li>Not just a point estimate, as one usually get with the classical approach</li>
+</ul>
+</li>
+<li>This gives information about the robustnes of the inference<ul>
+<li>By comparing MAP to other nearby points in hypothesis space</li>
+</ul>
+</li>
+<li>Lets you define Credible Intervals<ul>
+<li>What confidence intervals in classical is really supposed to be</li>
+</ul>
+</li>
+<li>Solutions to </li>
+</ul>
+</li>
+</ul>
 <p>A very useful property of Bayesian inference is that we don't just get point estimates of our model parameters, but we will instead get a full distribution of our probability estimate in parameter space. This means that we can get knowledge about how points in the neighbourhood of our best estimate compares. This has the useful property of letting us define <strong>credible intervals</strong>, which we will see in part 2, but it can in addition be used to do probabilistic estimation, which we will see in part 3. The Bayesian approach also provide solutions for some of the inherent pathologies that exist in classical statistics -- so it can for example do inference from a one-off event, which we will see in part 4.</p>
 
 </div>
@@ -14768,12 +14849,6 @@ $$<p>So we conclude that our posterior, based on this single datapoint $D$, says
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="References">References<a class="anchor-link" href="#References">&#182;</a></h2><p>[1] Shridhar et al. Uncertainty Estimations by Softplus normalization in Bayesian Convolutional Neural Networks with Variational Inference <a href="https://arxiv.org/pdf/1806.05978.pdf">https://arxiv.org/pdf/1806.05978.pdf</a></p>
-<p>[2] Wen et al. Flipout: Efficient pseudo independent weight perturbations on mini-batches <a href="https://arxiv.org/pdf/1803.04386.pdf">https://arxiv.org/pdf/1803.04386.pdf</a></p>
-<p>[3] LeCun et al. Gradient-Based Learning Applied to Document Recognition <a href="http://yann.lecun.com/exdb/publis/pdf/lecun-01a.pdf">http://yann.lecun.com/exdb/publis/pdf/lecun-01a.pdf</a></p>
-<p>[4] Mehta et al. A high-bias, low-variance introduction to Machine Learning for physisits <a href="https://arxiv.org/pdf/1803.08823.pdf">https://arxiv.org/pdf/1803.08823.pdf</a>, <a href="https://physics.bu.edu/~pankajm/MLnotebooks.html">https://physics.bu.edu/~pankajm/MLnotebooks.html</a></p>
-<p>[5] Book: Data Analysis - A Bayesian Tutorial by Devinderjit Sivia</p>
-<p>[6] Book: Machine Learning: A Probabilistic Perspective by Kevin P. Murphy</p>
 
 </div>
 </div>
