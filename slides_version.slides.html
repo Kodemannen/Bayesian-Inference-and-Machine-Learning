@@ -14469,11 +14469,9 @@ $$<ul>
 <ul>
 <li>The posterior is in other words useful for sampling too!<ul>
 <li>This is probabilistic ML</li>
+<li>Only 2N parameters for in principle an infinite ensemble of networks!</li>
 </ul>
 </li>
-</ul>
-<ul>
-<li>The number of parameters for in principle an infinite ensemble of networks</li>
 </ul>
 
 </div>
@@ -14496,6 +14494,9 @@ Source: Shridhar et al. [1].</p>
 $$
 p(w|D) = \frac{p(D|w)p(w)}{p(D)}
 $$</li>
+</ul>
+<ul>
+<li>$D$ represents the labels for all the input data (we have skipped the conditioning on $X$)</li>
 </ul>
 <ul>
 <li>Let our Bayesian Neural Network model $q_\theta$ be a multivariate Gaussian approximation to the true posterior $p$.</li>
@@ -14529,7 +14530,7 @@ $$
 $$</li>
 </ul>
 <ul>
-<li>The right side can be approximated as a discrete sum </li>
+<li>The right side can be approximated as a discrete sum by sampling $w^i$ from $q_\theta(w|D)$</li>
 </ul>
 $$
 \mathbb{E}_{q_\theta(w|D)}\big[\log \frac{q_\theta(w|D)}{p(w|D)}\big] \approx \frac{1}{m}\sum_i^m \log \frac{q_\theta(w^i|D)}{p(w^{i}|D)}.
@@ -14542,11 +14543,26 @@ $$p(w^i|D) = \dfrac{p(D|w^i)p(w^i)}{p(D)}$$<p></p>
 </ul>
 $$
 \mathbb{E}_{q_\theta(w|D)}\big[\log \frac{q_\theta(w|D)}{p(w|D)}\big] \approx \frac{1}{m}\sum_i^m \log {q_\theta(w^i|D)} - \log p(w^i) - \log p(D|w^i)   + \log p(D)
+$$
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+$$
+\frac{1}{m}\sum_i^m \log {q_\theta(w^i|D)} - \log p(w^i) - \log p(D|w^i)   + \log p(D)
 $$<ul>
-<li>This is a tractable objective function that can be minimized with respect to $\theta = (\mu, \sigma^2)$ by variational methods, Monte Carlo, evolutionary algorithms or other optimizing schemes. <ul>
+<li>For each $w^i$ that we sample we can calculate all the terms<ul>
+<li>$\log {q_\theta(w^i|D)}$ is the current approximation</li>
+<li>$\log p(w^i)$ is the prior </li>
+<li>$\log p(D|w^i)=p(D|w^i,X)$ is the predictions for all the input data $X$ </li>
 <li>The term $\log p(D)$ is just a constant, so we can remove that. </li>
 </ul>
 </li>
+</ul>
+<ul>
+<li>We then average over all the samples</li>
 </ul>
 
 </div>
@@ -14555,6 +14571,12 @@ $$<ul>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<ul>
+<li>We thus have a tractable objective function that can be minimized with respect to $\theta = (\mu, \sigma^2)$</li>
+</ul>
+<ul>
+<li>By variational methods, Monte Carlo, evolutionary algorithms etc. </li>
+</ul>
 <ul>
 <li>The optimum can now be found as</li>
 </ul>
@@ -14565,10 +14587,7 @@ $$<ul>
 &amp; = \underset{\theta}{\text{argmin}} \ \text{KL} \ \big[q_\theta(w|D)||p(w)\big] - \mathbb{E}_{q_\theta(w|D)}\big[\log p(D|w^i)\big]
 \end{align}
 }
-\end{equation}<p>by sampling $w^i$ from $q_\theta(w|D)$. This is also known as the <strong>evidence lower bound</strong> (ELBO).</p>
-<p>NB!
-For simplicity we have skipped the conditioning on the input data $X$.
-So e.g. $\log P(D|w^i)$ should really be understood as $\log P(D|w^i, X)$, meaning that it looks at the probability of setting the correct labels for the data $X$.</p>
+\end{equation}<p>This is also known as the <strong>evidence lower bound</strong> (ELBO).</p>
 
 </div>
 </div>
