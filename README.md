@@ -1,3 +1,4 @@
+{::nomarkdown}
 <html>
 <head><meta charset="utf-8" />
 
@@ -14806,3 +14807,4 @@ $$<p>So we conclude that our posterior, based on this single datapoint $D$, says
 
 
 </html>
+{:/}
