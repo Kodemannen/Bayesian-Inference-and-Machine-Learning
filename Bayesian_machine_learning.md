@@ -164,7 +164,7 @@ energies += np.random.normal(0,scale=np.sqrt(noise_variance), size=energies.shap
 ```
 
 
-![png](output_7_0.png)
+![png](Bayesian_machine_learning_files/Bayesian_machine_learning_7_0.png)
 
 
 ### Remapping data for regression
@@ -382,7 +382,7 @@ plt.show()
 ```
 
 
-![png](output_18_0.png)
+![png](Bayesian_machine_learning_files/Bayesian_machine_learning_18_0.png)
 
 
 ### The Posterior Distribution
@@ -430,7 +430,7 @@ plt.show()
 ```
 
 
-![png](output_20_0.png)
+![png](Bayesian_machine_learning_files/Bayesian_machine_learning_20_0.png)
 
 
 ### Credible Intervals
@@ -507,7 +507,7 @@ plt.show()
 ```
 
 
-![png](output_22_0.png)
+![png](Bayesian_machine_learning_files/Bayesian_machine_learning_22_0.png)
 
 
 ### Test data
