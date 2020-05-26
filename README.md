@@ -1,5 +1,3 @@
 # Bayesian-Inference-and-Machine-Learning
 
-See the file Bayesian_machine_learning.ipynb.
-
-Opens in Jupyter-notebook
+See https://github.com/Kodemannen/Bayesian-Inference-and-Machine-Learning/blob/master/Bayesian_machine_learning.ipynb or open the file bayesian_machine_learning.ipynb in Jupyter-notebook.
